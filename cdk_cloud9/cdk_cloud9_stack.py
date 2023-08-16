@@ -3,9 +3,7 @@ from aws_cdk import (
     aws_lambda as _lambda,
     Stack,
     SecretValue,
-    Size,
     aws_iam as iam,
-    aws_cloud9 as cloud9,
     aws_ec2 as ec2,
     aws_cloud9_alpha as cloud9_alpha,
     aws_codecommit as codecommit,
@@ -24,7 +22,7 @@ class CdkCloud9Stack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, 
                  username: str, 
-                #  repository: codecommit.Repository,
+                 repository: codecommit.Repository,
                  **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -36,7 +34,7 @@ class CdkCloud9Stack(Stack):
         )
         user.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AWSCloud9User"))
         user.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("IAMUserChangePassword"))
-        # repository.grant_pull_push(user)
+        repository.grant_pull_push(user)
         
         # Create a Cloud9 Instance and assign owner to created IAM user
         default_vpc = ec2.Vpc.from_lookup(self, "DefaultVPC", is_default=True)
@@ -48,9 +46,9 @@ class CdkCloud9Stack(Stack):
             instance_type=ec2.InstanceType("t2.micro"),
             image_id=cloud9_alpha.ImageId.AMAZON_LINUX_2,
             owner=cloud9_alpha.Owner.user(user),
-            # cloned_repositories=[
-            #     cloud9_alpha.CloneRepository.from_code_commit(repository, "/src/new-repo"),
-            # ],
+            cloned_repositories=[
+                cloud9_alpha.CloneRepository.from_code_commit(repository, "/src/new-repo"),
+            ],
         )    
         
         # Create EBS Volume (will attach to Cloud9 Instance using CustomResource)
@@ -63,6 +61,7 @@ class CdkCloud9Stack(Stack):
         )
         volume.apply_removal_policy(RemovalPolicy.RETAIN) # apply the policy to keep EBS volume if the Cloud9 instance is terminated.
         
+        # Create SSM Automation Content and Document
         ssm_content = {
             "schemaVersion": "0.3",
             "description": "Automation Document Example YAML Template",

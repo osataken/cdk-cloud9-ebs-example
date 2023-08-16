@@ -13,10 +13,10 @@ env = {
         'region': 'ap-southeast-1',
     }
 
-# codecommit_stack = CodeCommitStack(app, "cdk-codecommit-stack", env=env)
+codecommit_stack = CodeCommitStack(app, "cdk-codecommit-stack", env=env)
 cdk_c9_stack = CdkCloud9Stack(app, "cdk-cloud9-testuser1", 
                username='testuser1', 
-            #    repository= codecommit_stack.repository,
+               repository= codecommit_stack.repository,
                env=env)
 
 app.synth()
