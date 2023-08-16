@@ -31,7 +31,7 @@ class CdkCloud9Stack(Stack):
         # Create IAM User with console access
         user = iam.User(self, username,
             user_name=username,
-            password=SecretValue.unsafe_plain_text("thisIs@Book123"),
+            password=SecretValue.unsafe_plain_text("your_password_here"), # for non-production usage
             password_reset_required=True,
         )
         user.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name("AWSCloud9User"))
